@@ -20,6 +20,34 @@ namespace Demo.Controllers
             _signInManager = signInManager;
         }
 
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                ApplicationUser user = new ApplicationUser {UserName = model.Email, Email = model.Email};
+                //Insert into database using user manager
+                IdentityResult result = await _userManager.CreateAsync(user, model.Password);
+                if (result.Succeeded)
+                {//Signin user
+                    await _signInManager.SignInAsync(user, false);
+                    return RedirectToAction("Index", "Home");
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty,error.Description);
+                }
+
+                
+            }
+        }
+
         // GET: /<controller>/
         public IActionResult Index()
         {
